@@ -1,5 +1,5 @@
 // import React and useState
-import React, { useState } from "react"
+import React, { useState, Component } from "react"
 import {
     StyleSheet,
     Text,
@@ -8,10 +8,12 @@ import {
     Pressable,
     TouchableOpacity,
     ImageBackground,
+    Platform,
+    KeyboardAvoidingView,
 } from "react-native"
 import BackgroundImage from "../img/Background_Image.png"
 
-// This constant creates background colors
+// This constant creates background colors the user can choose from
 const colors = {
     black: "#090C08",
     purple: "#474056",
@@ -95,6 +97,9 @@ export default function Start(props) {
                     </Pressable>
                 </View>
             </ImageBackground>
+            {Platform.OS === "android" ? (
+                <KeyboardAvoidingView behavior="height" />
+            ) : null}
         </View>
     )
 }
