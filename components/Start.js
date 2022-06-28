@@ -1,5 +1,5 @@
 // import React and useState
-import React, { useState, Component } from "react"
+import React, { useState } from "react"
 import {
     StyleSheet,
     Text,
