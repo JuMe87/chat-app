@@ -1,5 +1,5 @@
 //import React
-import React from "react"
+import React, { Component } from "react"
 
 // import the screens we want to navigate
 import Chat from "./components/Chat"

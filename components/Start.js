@@ -40,7 +40,7 @@ export default function Start(props) {
                         onChangeText={(name) => setName(name)}
                         value={name}
                         style={styles.input}
-                        placeholder="Your name..."
+                        placeholder="Please insert your name."
                     />
 
                     {/* Allows user to choose a background color for chat screen */}
@@ -93,7 +93,7 @@ export default function Start(props) {
                             styles.button,
                         ]}
                     >
-                        <Text style={styles.buttontext}>Start Chatting</Text>
+                        <Text style={styles.buttontext}>Start chat</Text>
                     </Pressable>
                 </View>
             </ImageBackground>
