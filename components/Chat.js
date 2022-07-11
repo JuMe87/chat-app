@@ -4,7 +4,7 @@ import { View, Platform, KeyboardAvoidingView, StyleSheet } from "react-native"
 //Chat library
 import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat"
 
-// offline vs online data storage
+// online and offline library
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import NetInfo from "@react-native-community/netinfo"
 
@@ -33,7 +33,6 @@ class Chat extends Component {
                 name: "",
                 avatar: "",
             },
-
             isConnected: false,
         }
 
@@ -46,41 +45,6 @@ class Chat extends Component {
         this.referenceMessagesUser = null
     }
 
-    async saveMessages() {
-        try {
-            await AsyncStorage.setItem(
-                "messages",
-                JSON.stringify(this.state.messages)
-            )
-        } catch (error) {
-            console.log(error.message)
-        }
-    }
-
-    // saves messages to local storage
-    async getMessages() {
-        let messages = ""
-        try {
-            messages = (await AsyncStorage.getItem("messages")) || []
-            this.setState({
-                messages: JSON.parse(messages),
-            })
-        } catch (error) {
-            console.log(error.message)
-        }
-    }
-
-    async deleteMessages() {
-        try {
-            await AsyncStorage.removeItem("messages")
-            this.setState({
-                messages: [],
-            })
-        } catch (error) {
-            console.log(error.message)
-        }
-    }
-
     componentDidMount() {
         let { name } = this.props.route.params
         this.props.navigation.setOptions({ title: name })
@@ -88,7 +52,6 @@ class Chat extends Component {
         // Reference to load messages from Firebase
         this.referenceChatMessages = firebase.firestore().collection("messages")
 
-        // this function tells whether data is fetched from asyncStorage or Firestore
         NetInfo.fetch().then((connection) => {
             if (connection.isConnected) {
                 this.setState({ isConnected: true })
@@ -120,13 +83,51 @@ class Chat extends Component {
 
                     // saves messages when user is online
                     this.saveMessages()
-                    this.unsubscribe = this.referenceChatMessages.orderBy(
-                        "createdAt",
-                        "desc"
-                    )
-                    // .onSnapshot(this.onCollectionUpdate)
+                    this.unsubscribe = this.referenceChatMessages
+                        .orderBy("createdAt", "desc")
+                        .onSnapshot(this.onCollectionUpdate)
                 })
         })
+    }
+
+    // saves messages to local storage
+    async getMessages() {
+        let messages = ""
+        try {
+            messages = (await AsyncStorage.getItem("messages")) || []
+            this.setState({
+                messages: JSON.parse(messages),
+            })
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
+
+    async saveMessages() {
+        try {
+            await AsyncStorage.setItem(
+                "messages",
+                JSON.stringify(this.state.messages)
+            )
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
+
+    async deleteMessages() {
+        try {
+            await AsyncStorage.removeItem("messages")
+            this.setState({
+                messages: [],
+            })
+        } catch (error) {
+            console.log(error.message)
+        }
+    }
+
+    // stop listening to auth and collection changes
+    componentWillUnmount() {
+        this.authUnsubscribe()
     }
 
     onSend(messages = []) {
@@ -135,16 +136,10 @@ class Chat extends Component {
                 messages: GiftedChat.append(previousState.messages, messages),
             }),
             () => {
-                this.addMessages()
+                // this.addMessages()
                 this.saveMessages()
             }
         )
-    }
-
-    // stop listening to auth and collection changes
-    componentWillUnmount() {
-        this.authUnsubscribe()
-        this.unsubscribe()
     }
 
     // renders messages
@@ -178,7 +173,7 @@ class Chat extends Component {
         })
     }
 
-    // When user is offline Toolbaris disabled
+    // When user is offline disable sending new messages
     renderInputToolbar(props) {
         if (this.state.isConnected == false) {
         } else {
