@@ -1,5 +1,6 @@
 // import React and useState
 import React, { useState } from "react"
+import KeyboardSpacer from "react-native-keyboard-spacer"
 import {
     StyleSheet,
     Text,
