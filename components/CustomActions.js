@@ -9,22 +9,16 @@ import * as Permissions from "expo-permissions"
 import * as ImagePicker from "expo-image-picker"
 import * as Location from "expo-location"
 import { Camera } from "expo-camera"
+import { useActionSheet } from "@expo/react-native-action-sheet"
+import MapView from "react-native-maps"
 
-import "firebase/firestore"
-import firebase from "firebase"
+import * as firebase from "firebase"
 
-// import firebase
-// const firebase = require("firebase");
-// require("firebase/firestore");
-
-export default class CustomActions extends React.Component {
-    state = {
-        image: null,
-        location: null,
-    }
+export default function CustomActions(props) {
+    const { showActionSheetWithOptions } = useActionSheet()
 
     // Lets user pick photo from phone library
-    imagePicker = async () => {
+    const pickImage = async () => {
         // expo permission
         const { status } =
             await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -47,38 +41,41 @@ export default class CustomActions extends React.Component {
 
     // Let the user take a photo with device's camera
 
-    takePhoto = async () => {
-        const { status } = await Camera.requestCameraPermissionsAsync()
+    const takePhoto = async () => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync()
         try {
             if (status === "granted") {
                 const result = await ImagePicker.launchCameraAsync({
-                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    mediaTypes: ImagePicker.MediaTypeOptions.All,
                 }).catch((error) => console.log(error))
 
+                //If user selects an image, send it
                 if (!result.cancelled) {
-                    const imageUrl = await this.uploadImageFetch(result.uri)
-                    this.props.onSend({ image: imageUrl })
+                    const imageUrl = await uploadImage(result.uri)
+                    props.onSend({ image: imageUrl })
                 }
             }
         } catch (error) {
-            console.log(error.message)
+            console.error(error)
         }
     }
 
     // get the location of the user by using GPS
 
-    getLocation = async () => {
+    const getLocation = async () => {
+        //Ask for permission to access current location
+        const { status } = await Location.requestForegroundPermissionsAsync()
         try {
-            const { status } =
-                await Location.requestForegroundPermissionsAsync()
+            //If permission is granted, get their location
             if (status === "granted") {
                 const result = await Location.getCurrentPositionAsync({}).catch(
-                    (error) => console.log(error)
+                    (error) => {
+                        console.error(error)
+                    }
                 )
-                const longitude = JSON.stringify(result.coords.longitude)
-                const latitude = JSON.stringify(result.coords.latitude)
+                //If location is found/selected, send it
                 if (result) {
-                    this.props.onSend({
+                    props.onSend({
                         location: {
                             longitude: result.coords.longitude,
                             latitude: result.coords.latitude,
@@ -87,12 +84,12 @@ export default class CustomActions extends React.Component {
                 }
             }
         } catch (error) {
-            console.log(error.message)
+            console.error(error)
         }
     }
 
     //---convert image file into blob and store in Firebase Storage---
-    uploadImageFetch = async (uri) => {
+    const uploadImage = async (uri) => {
         const blob = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest()
             xhr.onload = function () {
@@ -109,9 +106,7 @@ export default class CustomActions extends React.Component {
 
         const imageNameBefore = uri.split("/")
         const imageName = imageNameBefore[imageNameBefore.length - 1]
-
         const ref = firebase.storage().ref().child(`images/${imageName}`)
-
         const snapshot = await ref.put(blob)
 
         blob.close()
@@ -120,16 +115,16 @@ export default class CustomActions extends React.Component {
     }
 
     //---function that handles communication features---
-    onActionPress = () => {
+    const onActionPress = () => {
         const options = [
-            "Choose Image From Library",
+            "Choose From Library",
             "Take Picture",
             "Send Location",
             "Cancel",
         ]
         const cancelButtonIndex = options.length - 1
-        console.log(this.context)
-        this.context.actionSheet().showActionSheetWithOptions(
+
+        showActionSheetWithOptions(
             {
                 options,
                 cancelButtonIndex,
@@ -138,36 +133,56 @@ export default class CustomActions extends React.Component {
                 switch (buttonIndex) {
                     case 0:
                         console.log("user wants to pick an image")
-                        return this.imagePicker()
+                        return pickImage()
                     case 1:
                         console.log("user wants to take a photo")
-                        return this.takePhoto()
+                        return takePhoto()
                     case 2:
                         console.log("user wants to get their location")
-                        return this.getLocation()
+                        return getLocation()
                 }
             }
         )
     }
 
-    //render function
-    render() {
-        return (
-            <TouchableOpacity
-                accessible={true}
-                accessibilityLabel="More options"
-                accessibilityHint="Let’s you choose to send an image or your geolocation."
-                style={[styles.container]}
-                onPress={this.onActionPress}
-            >
-                <View style={[styles.wrapper, this.props.wrapperStyle]}>
-                    <Text style={[styles.iconText, this.props.iconTextStyle]}>
-                        +
-                    </Text>
-                </View>
-            </TouchableOpacity>
-        )
+    const renderCustomView = (props) => {
+        const { currentMessage } = props
+        if (currentMessage.location) {
+            return (
+                <MapView
+                    style={{
+                        width: 150,
+                        height: 100,
+                        borderRadius: 13,
+                        margin: 3,
+                    }}
+                    region={{
+                        latitude: currentMessage.location.latitude,
+                        longitude: currentMessage.location.longitude,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
+                    }}
+                />
+            )
+        }
+        return null
     }
+
+    //render function
+    return (
+        <TouchableOpacity
+            accessible={true}
+            accessibilityLabel="More options"
+            accessibilityHint="Let’s you choose to send an image or your geolocation."
+            style={[styles.container]}
+            onPress={onActionPress}
+            renderCustomView={renderCustomView}
+        >
+            <View style={[styles.wrapper, props.wrapperStyle]}>
+                <Text style={[styles.iconText, props.iconTextStyle]}>+</Text>
+            </View>
+        </TouchableOpacity>
+    )
 }
 
 const styles = StyleSheet.create({
