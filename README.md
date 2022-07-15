@@ -1,5 +1,13 @@
 # Achievement 5 Project: React Native Mobile Chat App 
 
+## Table of Contents
+
+-   [Objective](#Objective)
+-   [Features and Requirements](#Features-and-Requirements)
+-   [Technologies the app was built with:](#technologies-the-app-was-built-with)
+-   [Setup](#setup)
+-   [Screenshots](#screenshots)
+
 ## Objective
 
 To build a chat app for mobile devices using React Native. The app will provide users with a chat interface and options to share images and their location.
