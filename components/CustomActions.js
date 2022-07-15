@@ -26,12 +26,12 @@ export default function CustomActions(props) {
             if (status === "granted") {
                 // pick image
                 const result = await ImagePicker.launchImageLibraryAsync({
-                    mediaTypes: ImagePicker.MediaTypeOptions.Images, // only images are allowed
+                    mediaTypes: ImagePicker.MediaTypeOptions.All, // only images are allowed
                 }).catch((error) => console.log(error))
                 // canceled process
                 if (!result.cancelled) {
-                    const imageUrl = await this.uploadImageFetch(result.uri)
-                    this.props.onSend({ image: imageUrl })
+                    const imageUrl = await uploadImage(result.uri)
+                    props.onSend({ image: imageUrl })
                 }
             }
         } catch (error) {
