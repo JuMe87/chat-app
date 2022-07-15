@@ -4,7 +4,7 @@
 
 -   [Objective](#Objective)
 -   [Features and Requirements](#Features-and-Requirements)
--   [Technologies the app was built with:](#technologies-the-app-was-built-with)
+-   [Technologies used](#technologies-used)
 -   [Setup](#setup)
 -   [Screenshots](#screenshots)
 
@@ -33,7 +33,7 @@ To build a chat app for mobile devices using React Native. The app will provide
     and location data.
 -   Data gets stored online and offline.
 
-### Technologies the app was built with:
+### Technologies used
 
 #### Frameworks/Libraries:
 
