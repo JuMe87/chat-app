@@ -47,6 +47,6 @@ To build a chat app for mobile devices using React Native. The app will provide
 
 ## Screenshots
 
-![screenshot](./assets/screenshot1.PNG) width="250" height="500"
-![screenshot](./assets/screenshot2.PNG) width="250" height="500"
-![screenshot](./assets/screenshot3.PNG) width="250" height="500"
+![screenshot](./assets/screenshot1.PNG)
+![screenshot](./assets/screenshot2.PNG)
+![screenshot](./assets/screenshot3.PNG)
